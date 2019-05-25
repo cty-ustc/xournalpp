@@ -6,7 +6,7 @@ project ("Xournal++" CXX C)
 set (PROJECT_VERSION "1.0.11")
 set (PROJECT_PACKAGE "xournalpp")
 set (PROJECT_STRING "${PROJECT_NAME} ${PROJECT_VERSION}")
-set (PROJECT_URL "https://github.com/xournalpp/xournalpp")
+set (PROJECT_URL "https://github.com/jaijeet/xournalpp")
 
 set (CMAKE_MODULE_PATH
     "${PROJECT_SOURCE_DIR}/cmake/find"
