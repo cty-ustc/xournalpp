@@ -1534,7 +1534,7 @@ void Control::calcZoomFitSize()
 		{
 			return;
 		}
-		double page_width = p->getWidth() + 20;
+		double page_width = p->getWidth(); // + 20; JR - get rid of borders!
 
 		Rectangle widget_rect = zoom->getVisibleRect();
 		double factor = widget_rect.width / page_width;

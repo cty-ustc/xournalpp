@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Layout.h"
 
 #include "XournalView.h"
@@ -9,22 +10,22 @@
 /**
  * Padding outside the pages, including shadow
  */
-const int XOURNAL_PADDING = 10;
+const int XOURNAL_PADDING = 0; // 10;
 
 /**
  * Padding outside the pages, if additional padding is set
  */
-const int XOURNAL_PADDING_FREE_SPACE = 150;
+const int XOURNAL_PADDING_FREE_SPACE = 0; // 150;
 
 /**
  * Allowance for shadow between page pairs in paired page mode
  */
-const int XOURNAL_ROOM_FOR_SHADOW = 3;
+const int XOURNAL_ROOM_FOR_SHADOW = 0; // 3;
 
 /**
  * Padding between the pages
  */
-const int XOURNAL_PADDING_BETWEEN = 15;
+const int XOURNAL_PADDING_BETWEEN = 0; // 15;
 
 
 
@@ -249,7 +250,8 @@ void Layout::layoutPages()
 
 	
 		
-	int borderX = MAX ( borderPrefX , centeringXBorder);
+	int oof = MAX ( borderPrefX , centeringXBorder); // JR
+    int borderX = 0; // JR
 	int borderY = MAX ( borderPrefY , centeringYBorder);
 	
 	
@@ -335,9 +337,8 @@ void Layout::layoutPages()
 	}
 	totalHeight += borderY - XOURNAL_PADDING_BETWEEN;
 
-
+    // std::cout << "totalWidth" << totalWidth << "\n"; // JR
 	this->setLayoutSize(totalWidth, totalHeight);
-	
 }
 
 
