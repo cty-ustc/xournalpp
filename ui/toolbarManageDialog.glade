@@ -59,7 +59,7 @@
                     <property name="can_focus">True</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection" id="treeview-selection"/>
-                        <property name="name">treeview-selection</property>
+                        <!-- <property name="name">treeview-selection</property> JR: this was causing xpp to crash -->
                     </child>
                   </object>
                   <packing>
