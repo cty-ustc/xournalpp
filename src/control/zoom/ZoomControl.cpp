@@ -281,7 +281,7 @@ bool ZoomControl::updateZoomFitValue(size_t pageNo)
 	}
 
 	Rectangle widget_rect = getVisibleRect();
-	double zoom_fit_width = widget_rect.width / (page->getWidth() + 20.0);
+	double zoom_fit_width = widget_rect.width / (page->getWidth() /* + 20.0 */); // jr: remove the +20 removes the annoying border on the right
 	if(zoom_fit_width < this->zoomMin || zoom_fit_width > this->zoomMax)
 	{
 		return false;
@@ -315,8 +315,8 @@ bool ZoomControl::updateZoomPresentationValue(size_t pageNo)
 	}
 
 	Rectangle widget_rect = getVisibleRect();
-	double zoom_fit_width = widget_rect.width / (page->getWidth() + 14.0);
-	double zoom_fit_height = widget_rect.height / (page->getHeight() + 14.0);
+	double zoom_fit_width = widget_rect.width / (page->getWidth() + 14.0); // jr: why the +14? - might have something to do with the red line
+	double zoom_fit_height = widget_rect.height / (page->getHeight() + 14.0); // jr: why the +14? - might have something to do with the red line
 	double zoom_presentation = zoom_fit_width < zoom_fit_height ? zoom_fit_width : zoom_fit_height;
 	if(zoom_presentation < this->zoomMin)
 	{
