@@ -1,3 +1,6 @@
+Compilation
+-----------
+
 ````bash
 git clone http://github.com/xournalpp/xournalpp.git
 cd xournalpp
@@ -18,3 +21,16 @@ To install all needed files execute:
 ```bash
 sudo make install
 ```
+
+
+TODOS
+-----
+
+- xournalpp already has means to customize menus and it works, so that does not need fixing
+- if you set a page grid (including vertical grid size = 1, horiz grid size open), then you get horiz scrolling
+- F11 works for toggling fullscreen, which is better than having to press a button
+- xournalpp comes with basic drawing primitives (line, arrow, rect, circle, etc.)
+----
+1. Get rid of the left right border - DONE (branch jr-fixHorizBorder)
+2. Fix the scaling to fit height button (and call it so)
+3. More pen sizes - at least one more (VERYFINE)

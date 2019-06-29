@@ -250,8 +250,7 @@ void Layout::layoutPages()
 
 	
 		
-	int oof = MAX ( borderPrefX , centeringXBorder); // JR
-    int borderX = 0; // JR
+    int borderX = 0; // MAX ( borderPrefX , centeringXBorder); // JR
 	int borderY = MAX ( borderPrefY , centeringYBorder);
 	
 	
