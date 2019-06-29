@@ -51,7 +51,7 @@ void EraseableStroke::draw(cairo_t* cr)
 	for (GList* l = tmpCopy->data; l != NULL; l = l->next)
 	{
 		EraseableStrokePart* part = (EraseableStrokePart*) l->data;
-		if (part->getWidth() == Point::NO_PRESURE)
+		if (part->getWidth() == Point::NO_PRESSURE)
 		{
 			cairo_set_line_width(cr, w);
 		}
@@ -385,6 +385,7 @@ GList* EraseableStroke::getStroke(Stroke* original)
 			s = new Stroke();
 			s->setColor(original->getColor());
 			s->setToolType(original->getToolType());
+			s->setLineStyle(original->getLineStyle());
 			s->setWidth(original->getWidth());
 			list = g_list_append(list, s);
 		}

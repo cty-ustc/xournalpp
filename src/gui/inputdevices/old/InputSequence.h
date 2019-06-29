@@ -15,7 +15,7 @@
 #include <XournalType.h>
 
 #include <gtk/gtk.h>
-#include "PositionInputData.h"
+#include "gui/inputdevices/PositionInputData.h"
 
 class NewGtkInputDevice;
 class XojPageView;
@@ -31,17 +31,17 @@ public:
 	/**
 	 * Mouse / Pen / Touch move
 	 */
-	bool actionMoved();
+	bool actionMoved(guint32 time);
 
 	/**
 	 * Mouse / Pen down / touch start
 	 */
-	bool actionStart();
+	bool actionStart(guint32 time);
 
 	/**
 	 * Mouse / Pen up / touch end
 	 */
-	void actionEnd();
+	void actionEnd(guint32 time);
 
 	/**
 	 * Check if input is still running, or if there an event was missed
@@ -85,7 +85,7 @@ public:
 	/**
 	 * Set (mouse)button
 	 */
-	void setButton(guint button);
+	void setButton(guint button, guint time);
 
 	/**
 	 * Set state flags from GDKevent (Shift down etc.)
@@ -208,12 +208,12 @@ private:
 	/**
 	 * Last mouse position for Scrolling
 	 */
-	int lastMousePositionX = 0;
+	double lastMousePositionX = 0;
 
 	/**
 	 * Last mouse position for Scrolling
 	 */
-	int lastMousePositionY = 0;
+	double lastMousePositionY = 0;
 
 	/**
 	 * Currently scrolling active
@@ -223,10 +223,18 @@ private:
 	/**
 	 * The last Mouse Position, for scrolling
 	 */
-	int scrollOffsetX = 0;
+	double scrollOffsetX = 0;
 
 	/**
 	 * The last Mouse Position, for scrolling
 	 */
-	int scrollOffsetY = 0;
+	double scrollOffsetY = 0;
+
+	
+	/**
+	 * event time
+	 */
+	guint32 eventTime;
+	
+	
 };
