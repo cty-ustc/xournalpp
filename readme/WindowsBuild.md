@@ -1,58 +1,50 @@
 # Xournal++ Windows Build
 
-**Windows Build is working now, but Xournal++ is not yet fully supported
-on Windows.**
-
-See also [Linux Build](LinuxBuild.md)
-
-Pull requests with fixes to the Code **and to this manual** are welcome!
-This manual is not yet completed.
-
-
 ![Screenshot](main-win.png?raw=true "Xournal++ Screenshot on Win10")
 
 ## Preparation
-Install MSYS2
-Install NSIS to the standard Folder.
+1. Install [MSYS2](https://www.msys2.org/) to a short path without spaces.
+2. Install [NSIS](https://nsis.sourceforge.io/Download) to the standard directory.
+3. Start Mingw-w64 64bit. (Always check if it says **MINGW64** - not 32bit and not MSYS2)
 
-Start Mingw-w64 64bit. (Always Check **64bit** not 32bit and not MSYS2)
+This will open a console. All following steps happen in this console.
 
-Update MSYS (do this multiple times,
-close Terminal after each update)
+## Update MSYS2
 
+Do this multiple times, close the Terminal after each update
 ```bash
 pacman -Syuu
 ```
 
 ## Install GIT
+
 ```bash
 pacman -S git
 ```
 
 ## Install Build tools
-```bash
-pacman -S mingw-w64-x86_64-cmake; \
-pacman -S make; \
-pacman -S mingw-w64-x86_64-toolchain; \
-pacman -S --needed base-devel mingw-w64-x86_64-toolchain \
-mingw-w64-x86_64-cmake
-```
-(this is a duplicate of the lines above, probably only this line is needed.
-Can anybody confirm this?)
--> press enter multiple times / confirm all default values
 
 ```bash
-pacman -S mingw-w64-x86_64-gcc
+pacman -S mingw-w64-x86_64-toolchain \
+          mingw-w64-x86_64-cmake \
+          mingw-w64-x86_64-make \
+          mingw-w64-x86_64-ninja \
+          patch \
+          make \
+          tar \
+          mingw-w64-x86_64-cppunit
 ```
+-> press enter multiple times / confirm all default values
 
 ## Install dependencies
 
 ```bash
-pacman -S mingw-w64-x86_64-poppler; \
-pacman -S mingw-w64-x86_64-gtk3; \
-pacman -S mingw-w64-x86_64-libsndfile; \
-pacman -S mingw-w64-x86_64-libzip
+pacman -S mingw-w64-x86_64-poppler \
+          mingw-w64-x86_64-gtk3 \
+          mingw-w64-x86_64-libsndfile \
+          mingw-w64-x86_64-libzip
 ```
+-> press enter multiple times / confirm all default values
 
 ## Get sources
 
@@ -61,25 +53,34 @@ git clone https://github.com/xournalpp/xournalpp.git
 cd xournalpp/
 ```
 
-## sndfile / PortAudio
+## Install sndfile / PortAudio
+
 Build/Install portaudio with
 ```bash
 windows-setup/build-portaudio.sh
 ```
 
-### Lua
+### Install Lua
+
 Build/Install lua with
 ```bash
 windows-setup/build-lua.sh
 ```
 
-## Build
+## Build Xournal++
+
 ```bash
 mkdir build
 cd build/
 cmake ..
-make
+cmake --build .
 ```
+
+You can run Xournal++ with
+```bash
+./src/xournalpp.exe
+```
+or package it in an installer (see below).
 
 ## Packaging and Setup
 Create the installer with

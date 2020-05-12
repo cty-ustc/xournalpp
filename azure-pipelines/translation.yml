@@ -9,24 +9,23 @@ stages:
   jobs:
   - job: 'Linux'
     pool:
-      vmImage: 'ubuntu-16.04'
+      vmImage: 'ubuntu-18.04'
     displayName: 'Update translation template'
     steps:
     - bash: |
         git config --local user.name "Azure Pipelines"
         git config --local user.email "azuredevops@microsoft.com"
       displayName: 'Setup git'
-    - bash: |
-        sudo apt-get update
-        sudo apt-get install -y cmake libcppunit-dev libgtk-3-dev libpoppler-glib-dev portaudio19-dev libsndfile-dev liblua5.3-dev libzip-dev
-      displayName: 'Install dependencies'
+    - template: steps/install_deps_ubuntu.yml
     - bash: |
         git checkout master
         mkdir build
       displayName: 'Create build directory'
     - bash: |
+        export CXX=g++-8
+        export CC=gcc-8
         cmake ..
-        make pot
+        cmake --build . --target pot
       workingDirectory: ./build
       displayName: 'Build Xournal++ translation template'
     - task: DownloadSecureFile@1
@@ -35,7 +34,7 @@ stages:
       displayName: 'Get the deploy key'
     - bash: |
         if [[ $(git diff --word-diff=porcelain --no-color -U0 | wc -l) -gt 9 ]]; then
-          git commit -am "Update translation template [skip ci]"
+          git commit -am "[skip ci] Update translation template"
 
           mkdir ~/.ssh && mv $DOWNLOADSECUREFILE_SECUREFILEPATH ~/.ssh/id_rsa
           chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_rsa

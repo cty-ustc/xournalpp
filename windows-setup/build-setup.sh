@@ -28,7 +28,9 @@ echo "build windows launcher"
 echo "copy binaries"
 
 cp ../build/src/xournalpp.exe ./setup/bin/xournalpp_bin.exe
-ldd ../build/src/xournalpp.exe | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" setup/bin/
+ldd ../build/src/xournalpp.exe | grep '\/mingw.*\.dll' -o | sort -u | xargs -I{} cp "{}" setup/bin/
+# CI workaround: copy libcrypto and libssl in case they are not already copied.
+ldd ../build/src/xournalpp.exe | grep -E 'lib(ssl|crypto)[^\.]*\.dll' -o | sort -u | xargs -I{} cp "/mingw64/bin/{}" setup/bin/
 
 echo "copy ui"
 
@@ -61,6 +63,10 @@ cp -r /mingw64/share/icons setup/share/
 
 echo "copy glib shared"
 cp -r /mingw64/share/glib-2.0 setup/share/
+
+echo "copy gspawn-win64-helper"
+cp /mingw64/bin/gspawn-win64-helper.exe setup/bin
+cp /mingw64/bin/gspawn-win64-helper-console.exe setup/bin
 
 echo "pack setup"
 "/c/Program Files (x86)/NSIS/Bin/makensis.exe" xournalpp.nsi

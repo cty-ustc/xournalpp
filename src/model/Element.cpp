@@ -1,197 +1,118 @@
 #include "Element.h"
 
-#include <serializing/ObjectInputStream.h>
-#include <serializing/ObjectOutputStream.h>
+#include <cmath>
 
-Element::Element(ElementType type)
- : type(type)
-{
-	XOJ_INIT_TYPE(Element);
+#include "serializing/ObjectInputStream.h"
+#include "serializing/ObjectOutputStream.h"
+
+Element::Element(ElementType type): type(type) {}
+
+Element::~Element() = default;
+
+auto Element::getType() const -> ElementType { return this->type; }
+
+void Element::setX(double x) { this->x = x; }
+
+void Element::setY(double y) { this->y = y; }
+
+auto Element::getX() -> double {
+    if (!this->sizeCalculated) {
+        this->sizeCalculated = true;
+        calcSize();
+    }
+    return x;
 }
 
-Element::~Element()
-{
-	XOJ_RELEASE_TYPE(Element);
+auto Element::getY() -> double {
+    if (!this->sizeCalculated) {
+        this->sizeCalculated = true;
+        calcSize();
+    }
+    return y;
 }
 
-ElementType Element::getType() const
-{
-	XOJ_CHECK_TYPE(Element);
-
-	return this->type;
+void Element::move(double dx, double dy) {
+    this->x += dx;
+    this->y += dy;
 }
 
-void Element::setX(double x)
-{
-	XOJ_CHECK_TYPE(Element);
-
-	this->x = x;
+auto Element::getElementWidth() -> double {
+    if (!this->sizeCalculated) {
+        this->sizeCalculated = true;
+        calcSize();
+    }
+    return this->width;
 }
 
-void Element::setY(double y)
-{
-	XOJ_CHECK_TYPE(Element);
-
-	this->y = y;
+auto Element::getElementHeight() -> double {
+    if (!this->sizeCalculated) {
+        this->sizeCalculated = true;
+        calcSize();
+    }
+    return this->height;
 }
 
-double Element::getX()
-{
-	XOJ_CHECK_TYPE(Element);
-
-	if (!this->sizeCalculated)
-	{
-		this->sizeCalculated = true;
-		calcSize();
-	}
-	return x;
+auto Element::boundingRect() -> Rectangle<double> {
+    return Rectangle<double>(getX(), getY(), getElementWidth(), getElementHeight());
 }
 
-double Element::getY()
-{
-	XOJ_CHECK_TYPE(Element);
+void Element::setColor(int color) { this->color = color; }
 
-	if (!this->sizeCalculated)
-	{
-		this->sizeCalculated = true;
-		calcSize();
-	}
-	return y;
+auto Element::getColor() const -> int { return this->color; }
+
+auto Element::intersectsArea(const GdkRectangle* src) -> bool {
+    GdkRectangle rect = {gint(getX()), gint(getY()), gint(getElementWidth()), gint(getElementHeight())};
+
+    return gdk_rectangle_intersect(src, &rect, nullptr);
 }
 
-void Element::move(double dx, double dy)
-{
-	XOJ_CHECK_TYPE(Element);
+auto Element::intersectsArea(double x, double y, double width, double height) -> bool {
+    double dest_x = NAN, dest_y = NAN;
+    double dest_w = NAN, dest_h = NAN;
 
-	this->x += dx;
-	this->y += dy;
+    dest_x = std::max(getX(), x);
+    dest_y = std::max(getY(), y);
+    dest_w = std::min(getX() + getElementWidth(), x + width) - dest_x;
+    dest_h = std::min(getY() + getElementHeight(), y + height) - dest_y;
+
+    return (dest_w > 0 && dest_h > 0);
 }
 
-double Element::getElementWidth()
-{
-	XOJ_CHECK_TYPE(Element);
+auto Element::isInSelection(ShapeContainer* container) -> bool {
+    if (!container->contains(getX(), getY())) {
+        return false;
+    }
+    if (!container->contains(getX() + getElementWidth(), getY())) {
+        return false;
+    }
+    if (!container->contains(getX(), getY() + getElementHeight())) {
+        return false;
+    }
+    if (!container->contains(getX() + getElementWidth(), getY() + getElementHeight())) {
+        return false;
+    }
 
-	if (!this->sizeCalculated)
-	{
-		this->sizeCalculated = true;
-		calcSize();
-	}
-	return this->width;
+    return true;
 }
 
-double Element::getElementHeight()
-{
-	XOJ_CHECK_TYPE(Element);
+auto Element::rescaleOnlyAspectRatio() -> bool { return false; }
 
-	if (!this->sizeCalculated)
-	{
-		this->sizeCalculated = true;
-		calcSize();
-	}
-	return this->height;
+void Element::serializeElement(ObjectOutputStream& out) const {
+    out.writeObject("Element");
+
+    out.writeDouble(this->x);
+    out.writeDouble(this->y);
+    out.writeInt(this->color);
+
+    out.endObject();
 }
 
-Rectangle Element::boundingRect()
-{
-	return Rectangle(getX(), getY(), getElementWidth(), getElementHeight());
-}
+void Element::readSerializedElement(ObjectInputStream& in) {
+    in.readObject("Element");
 
-void Element::setColor(int color)
-{
-	XOJ_CHECK_TYPE(Element);
+    this->x = in.readDouble();
+    this->y = in.readDouble();
+    this->color = in.readInt();
 
-	this->color = color;
-}
-
-int Element::getColor() const
-{
-	XOJ_CHECK_TYPE(Element);
-
-	return this->color;
-}
-
-bool Element::intersectsArea(const GdkRectangle* src)
-{
-	XOJ_CHECK_TYPE(Element);
-
-	GdkRectangle rect = {
-		gint(getX()),
-		gint(getY()),
-		gint(getElementWidth()),
-		gint(getElementHeight())
-	};
-
-	return gdk_rectangle_intersect(src, &rect, NULL);
-}
-
-bool Element::intersectsArea(double x, double y, double width, double height)
-{
-	XOJ_CHECK_TYPE(Element);
-
-	double dest_x, dest_y;
-	double dest_w, dest_h;
-
-	dest_x = MAX(getX(), x);
-	dest_y = MAX(getY(), y);
-	dest_w = MIN(getX() + getElementWidth(), x + width) - dest_x;
-	dest_h = MIN(getY() + getElementHeight(), y + height) - dest_y;
-
-	return (dest_w > 0 && dest_h > 0);
-}
-
-bool Element::isInSelection(ShapeContainer* container)
-{
-	XOJ_CHECK_TYPE(Element);
-
-	if (!container->contains(getX(), getY()))
-	{
-		return false;
-	}
-	if (!container->contains(getX() + getElementWidth(), getY()))
-	{
-		return false;
-	}
-	if (!container->contains(getX(), getY() + getElementHeight()))
-	{
-		return false;
-	}
-	if (!container->contains(getX() + getElementWidth(), getY() + getElementHeight()))
-	{
-		return false;
-	}
-
-	return true;
-}
-
-bool Element::rescaleOnlyAspectRatio()
-{
-	XOJ_CHECK_TYPE(Element);
-
-	return false;
-}
-
-void Element::serializeElement(ObjectOutputStream& out)
-{
-	XOJ_CHECK_TYPE(Element);
-
-	out.writeObject("Element");
-
-	out.writeDouble(this->x);
-	out.writeDouble(this->y);
-	out.writeInt(this->color);
-
-	out.endObject();
-}
-
-void Element::readSerializedElement(ObjectInputStream& in)
-{
-	XOJ_CHECK_TYPE(Element);
-
-	in.readObject("Element");
-
-	this->x = in.readDouble();
-	this->y = in.readDouble();
-	this->color = in.readInt();
-
-	in.endObject();
+    in.endObject();
 }

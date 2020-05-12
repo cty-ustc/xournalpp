@@ -11,35 +11,58 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <config.h>
-#include <XournalType.h>
+
+#include "XournalType.h"
 
 class GladeSearchpath;
 class Control;
 
-class XournalMain
-{
+class XournalMain {
 public:
-	XournalMain();
-	virtual ~XournalMain();
+    XournalMain();
+    virtual ~XournalMain();
 
 public:
-	int run(int argc, char* argv[]);
+    int run(int argc, char* argv[]);
 
 private:
-	void initLocalisation();
+    static void initLocalisation();
 
-	void checkForErrorlog();
-	void checkForEmergencySave(Control* control);
+    /**
+     * Configuration migration status.
+     */
+    enum class MigrateStatus {
+        /** No migration was needed. */
+        NotNeeded,
+        /** Migration was carried out successfully. */
+        Success,
+        /** Migration failed. */
+        Failure,
+    };
 
-	int exportPdf(const char* input, const char* output);
-	int exportImg(const char* input, const char* output);
+    struct MigrateResult {
+        MigrateStatus status;
+        /** Any additional information about the migration status. */
+        std::string message;
+    };
 
-	void initSettingsPath();
-	void initResourcePath(GladeSearchpath* gladePath);
-	void initResourcePath(GladeSearchpath* gladePath, const gchar* relativePathAndFile, bool failIfNotFound = true);
-	string findResourcePath(string searchFile);
+    static MigrateResult migrateSettings();
+
+    static void checkForErrorlog();
+    static void checkForEmergencySave(Control* control);
+
+    static int exportPdf(const char* input, const char* output);
+    static int exportImg(const char* input, const char* output);
+
+    void initSettingsPath();
+    void initResourcePath(GladeSearchpath* gladePath);
+    static void initResourcePath(GladeSearchpath* gladePath, const gchar* relativePathAndFile,
+                                 bool failIfNotFound = true);
+    static string findResourcePath(const string& searchFile);
 
 private:
-	XOJ_TYPE_ATTRIB;
 };

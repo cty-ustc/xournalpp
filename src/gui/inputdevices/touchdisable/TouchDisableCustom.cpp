@@ -1,28 +1,15 @@
 #include "TouchDisableCustom.h"
 
-TouchDisableCustom::TouchDisableCustom(string enableCommand, string disableCommand)
- : enableCommand(enableCommand),
-   disableCommand(disableCommand)
-{
-	XOJ_INIT_TYPE(TouchDisableCustom);
-}
+#include <utility>
 
-TouchDisableCustom::~TouchDisableCustom()
-{
-	XOJ_CHECK_TYPE(TouchDisableCustom);
-	XOJ_RELEASE_TYPE(TouchDisableCustom);
-}
+#include "Util.h"
 
-void TouchDisableCustom::enableTouch()
-{
-	XOJ_CHECK_TYPE(TouchDisableCustom);
 
-	system(enableCommand.c_str());
-}
+TouchDisableCustom::TouchDisableCustom(string enableCommand, string disableCommand):
+        enableCommand(std::move(enableCommand)), disableCommand(std::move(disableCommand)) {}
 
-void TouchDisableCustom::disableTouch()
-{
-	XOJ_CHECK_TYPE(TouchDisableCustom);
+TouchDisableCustom::~TouchDisableCustom() = default;
 
-	system(disableCommand.c_str());
-}
+void TouchDisableCustom::enableTouch() { Util::systemWithMessage(enableCommand.c_str()); }
+
+void TouchDisableCustom::disableTouch() { Util::systemWithMessage(disableCommand.c_str()); }

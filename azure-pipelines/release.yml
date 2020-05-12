@@ -1,89 +1,144 @@
 trigger:
-- master
+  tags:
+    include:
+      - ?*.?*.?*
+    exclude:
+      - nightly
+schedules:
+  - cron: "0 0 * * *"
+    displayName: Nightly build
+    branches:
+      include:
+      - master
 pr: none
-
+variables:
+  versionNumber: ''
+  versionTag: ''
+  buildType: 'unknown'
 stages:
-- stage: Release
-  jobs:
-  - job: Windows
-    pool:
-      vmImage: 'vs2017-win2016'
-    displayName: 'Build for Windows'
-    steps:
-    - script: |
-        git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
-        %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
-      displayName: 'Install MSYS2'
-    - script: |
-        set PATH=%CD:~0,2%\msys64\usr\bin;%CD:~0,2%\msys64\mingw64\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syuu
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syuu
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-cmake make mingw-w64-x86_64-toolchain
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-poppler mingw-w64-x86_64-gtk3 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libzip
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
-      env:
-        MSYS2_ARCH: x86_64
-        MSYSTEM: MINGW64
-        CHERE_INVOKING: yes
-      displayName: 'Install dependencies on Windows'
-    - script: |
-        set PATH=%PATH%;%CD:~0,2%\msys64\usr\bin;%CD:~0,2%\msys64\mingw64\bin"
-        %CD:~0,2%\msys64\usr\bin\bash -lc "./build-portaudio.sh"
-      workingDirectory: ./windows-setup
-      env:
-        MSYS2_ARCH: x86_64
-        MSYSTEM: MINGW64
-        CHERE_INVOKING: yes
-      displayName: 'Build Portaudio'
-    - script: |
-        set PATH=%PATH%;%CD:~0,2%\msys64\usr\bin;%CD:~0,2%\msys64\mingw64\bin"
-        %CD:~0,2%\msys64\usr\bin\bash -lc "./build-lua.sh"
-      workingDirectory: ./windows-setup
-      env:
-        MSYS2_ARCH: x86_64
-        MSYSTEM: MINGW64
-        CHERE_INVOKING: yes
-      displayName: 'Build Lua'
-    - script: |
-        set PATH=%PATH%;%CD:~0,2%\msys64\usr\bin;%CD:~0,2%\msys64\mingw64\bin"
-        %CD:~0,2%\msys64\usr\bin\bash -lc "mkdir build"
-      env:
-        MSYS2_ARCH: x86_64
-        MSYSTEM: MINGW64
-        CHERE_INVOKING: yes
-      displayName: 'Create build directory'
-    - script: |
-        set PATH=%PATH%;%CD:~0,2%\msys64\usr\bin;%CD:~0,2%\msys64\mingw64\bin"
-        %CD:~0,2%\msys64\usr\bin\bash -lc "cmake .."
-        %CD:~0,2%\msys64\usr\bin\bash -lc "make"
-      workingDirectory: ./build
-      env:
-        MSYS2_ARCH: x86_64
-        MSYSTEM: MINGW64
-        CHERE_INVOKING: yes
-      displayName: 'Build Xournal++'
-    - script: |
-        set PATH=%PATH%;%CD:~0,2%\msys64\usr\bin;%CD:~0,2%\msys64\mingw64\bin"
-        %CD:~0,2%\msys64\usr\bin\bash -lc "./build-setup.sh"
-      workingDirectory: ./windows-setup
-      env:
-        MSYS2_ARCH: x86_64
-        MSYSTEM: MINGW64
-        CHERE_INVOKING: yes
-      displayName: 'Create Setup'
-    - task: PublishPipelineArtifact@0
-      inputs:
-        artifactName: 'windows'
-        targetPath: './windows-setup/xournalpp-setup.exe'
-      displayName: 'Publish Windows Setup'
+  - stage: SetVersionInformation
+    jobs:
+      - job: 'Versioning'
+        pool:
+          vmImage: 'ubuntu-18.04'
+        displayName: 'Set Build Number'
+        steps:
+          - bash: |
+              mkdir build
+              cd build
+              cmake ..
+              exit 0
+            displayName: 'Create Version Information'
+          - bash: |
+              VER=$(cat VERSION | sed '1q;d')
+              TAG=`date +"%Y%m%d"`
+              echo "##vso[build.updatebuildnumber]${VER}-nightly.${TAG}"
+            name: 'VersionNightly'
+            displayName: 'Set Version Information for Nightly'
+            workingDirectory: ./build
+            condition: or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['runForRelease'], 'False')) # Run for scheduled (nightlies)
+          - bash: |
+              VER=$(cat VERSION | sed '1q;d')
+              echo "##vso[build.updatebuildnumber]${VER}"
+            name: 'VersionRelease'
+            displayName: 'Set Version Information for Release'
+            workingDirectory: ./build
+            condition: or(ne(variables['Build.Reason'], 'Schedule'), ne(variables['runForRelease'], 'False')) # Run for non-scheduled (release)
+  - stage: Release
+    jobs:
+      - job: 'Ubuntu'
+        pool:
+          vmImage: 'ubuntu-18.04'
+        displayName: 'Build for Ubuntu'
+        condition: always()
+        steps:
+          - template: steps/install_deps_ubuntu.yml
+          - template: steps/build_linux.yml
+            parameters:
+              build_type: 'RelWithDebInfo'
+              cmake_flags: '-DCMAKE_DEBUG_INCLUDES_LDFLAGS=ON -DENABLE_CPPUNIT=ON -DDEBUG_COMPILE=ON -DCMAKE_INSTALL_PREFIX=$PWD/staging -DCPACK_GENERATOR="TGZ;DEB"'
+              cmake_commands: '--target package'
+          - bash: |
+              # Build AppImage
+              export VERSION=$(cat VERSION | sed '1q;d')
+              export ARCH=$(cat VERSION | sed '4q;d')
+              ../azure-pipelines/util/build_appimage.sh
+              # Move and rename the generated AppImage file
+              find . -name '*.AppImage' -not -name 'linuxdeploy.AppImage' -exec mv {} packages/xournalpp-$VERSION-$ARCH.AppImage \;
+            workingDirectory: ./build
+            displayName: 'Create AppImage'
+          - task: PublishPipelineArtifact@1
+            inputs:
+              artifactName: 'linux-ubuntu-packages'
+              targetPath: '$(System.DefaultWorkingDirectory)/build/packages'
+            displayName: 'Publish packages'
+      - job: 'Debian'
+        pool:
+          vmImage: 'ubuntu-18.04'
+        container:
+          image: xournalpp/debian-latest-sudo:latest
+        displayName: 'Build for Debian'
+        condition: always()
+        steps:
+          - bash: |
+              sudo apt-get update
+              sudo apt-get install -y gcc-8 g++-8 cmake ninja-build libcppunit-dev libgtk-3-dev libpoppler-glib-dev libxml2-dev portaudio19-dev libsndfile-dev liblua5.3-dev \
+                                      libzip-dev gettext lsb-release
+            displayName: 'Install dependencies'
+          - template: steps/build_linux.yml
+            parameters:
+              build_type: 'RelWithDebInfo'
+              cmake_flags: '-DCMAKE_DEBUG_INCLUDES_LDFLAGS=ON -DENABLE_CPPUNIT=ON -DDEBUG_COMPILE=ON -DCMAKE_INSTALL_PREFIX=$PWD/staging -DCPACK_GENERATOR="TGZ;DEB"'
+              cmake_commands: '--target package'
+          - task: PublishPipelineArtifact@1
+            inputs:
+              artifactName: 'linux-debian-packages'
+              targetPath: '$(System.DefaultWorkingDirectory)/build/packages'
+            displayName: 'Publish packages'
+          
+      - job: Windows
+        pool:
+          vmImage: 'vs2017-win2016'
+        displayName: 'Build for Windows'
+        condition: always()
+        steps:
+          - template: steps/build_windows.yml
+            parameters:
+              build_type: 'RelWithDebInfo'
+              cmake_flags: ''
+          - script: |
+              set PATH=%PATH%;C:\msys64\usr\bin;C:\msys64\mingw64\bin"
+              C:\msys64\usr\bin\bash -lc "./build-setup.sh"
+            workingDirectory: ./windows-setup
+            env:
+              MSYS2_ARCH: x86_64
+              MSYSTEM: MINGW64
+              CHERE_INVOKING: yes
+            displayName: 'Create Setup'
+          - task: PublishPipelineArtifact@0
+            inputs:
+              artifactName: 'windows'
+              targetPath: './windows-setup/xournalpp-setup.exe'
+            displayName: 'Publish Windows Setup'
 
-#  - job: macOS
-#    pool:
-#      vmImage: 'macOS-10.13'
-#    displayName: 'Build for macOS'
-#    steps:
-#    - bash: |
-#        echo !!!TODO!!!
-#      displayName: 'Install dependencies on macOS'
+      - job: macOS
+        pool:
+          vmImage: 'macOS-10.15'
+        displayName: 'Build for macOS'
+        condition: always()
+        steps:
+          - template: steps/build_mac.yml
+            parameters:
+              build_type: 'RelWithDebInfo'
+              cmake_flags: '-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13'
+          - bash: |
+              export PATH="$HOME/.local/bin:/Users/git-bin/gtk/inst/bin:$PATH"
+              ./build-app.sh /Users/git-bin/gtk
+            workingDirectory: ./mac-setup
+            displayName: 'Create App'
+          - task: PublishPipelineArtifact@0
+            inputs:
+              artifactName: 'macOS'
+              targetPath: './mac-setup/Xournal++.zip'
+            displayName: 'Publish macOS Setup'
 

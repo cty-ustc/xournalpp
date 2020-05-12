@@ -1,0 +1,56 @@
+parameters:
+  build_type: ''
+  cmake_flags: ''
+
+steps:
+  - bash: |
+      # Ignore Homebrew uninstall errors
+      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall)" || true
+    displayName: 'Uninstall brew'
+  - bash: |
+      cd /Users
+      sudo mkdir git-bin
+      sudo chown $USER git-bin
+      cd git-bin
+      curl -L -o gtk-bin.tar.gz https://github.com/xournalpp/xournalpp-pipeline-dependencies/raw/master/gtk/mac/10.13/gtk-bin.tar.gz
+      tar -xzf gtk-bin.tar.gz
+    displayName: 'Unpack GTK'
+  - bash: |
+      curl -L -o libxml.tar.gz https://github.com/xournalpp/xournalpp-pipeline-dependencies/raw/master/libxml/mac/10.13/libxml.tar.gz
+      sudo tar -xzf libxml.tar.gz -C /
+    displayName: 'Unpack libxml'
+  - bash: |
+      mkdir build
+    displayName: 'Create Build Directory'
+  - bash: |
+      # Ninja >= 1.10.0 binaries depend on Catalina or newer, so use 1.9.0 instead.
+      curl -L -o ninja-mac.zip https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-mac.zip
+
+      # curl -L -o ninja-mac.zip $(curl -s https://api.github.com/repos/ninja-build/ninja/releases/latest | grep "browser_download_url.*mac\.zip" | cut -d : -f 2,3 | tr -d '"')
+      # Fallback to version 1.9.0 if the previous request fails for some reason
+      if [ ! -f ninja-mac.zip ]; then
+        curl -L -o ninja-mac.zip https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-mac.zip
+      fi
+      unzip ninja-mac.zip -d /Users/git-bin/gtk/inst/bin
+    displayName: 'Get Ninja'
+  - bash: |
+      set -e
+      # Using SourceForge instead of bintray due to boostorg/boost#299
+      curl -L -o boost_1_72_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.gz/download
+      tar -xzf boost_1_72_0.tar.gz
+      cd boost_1_72_0
+      ./bootstrap.sh --prefix=/usr/local/boost-1.72.0
+      sudo ./b2 cxxflags="-std=c++17" --with-system --with-filesystem variant=release link=static threading=multi install
+      export DYLD_LIBRARY_PATH=/usr/local/boost-1.72.0/lib:$DYLD_LIBRARY_PATH
+    displayName: 'Build boost'
+  - bash: |
+      export PATH="$HOME/.local/bin:/Users/git-bin/gtk/inst/bin:$PATH"
+      cmake -GNinja -DCMAKE_INSTALL_PREFIX:PATH=/Users/git-bin/gtk/inst .. -DCMAKE_BUILD_TYPE=${{ parameters.build_type }} ${{ parameters.cmake_flags }}
+      # Make sure pot is up to date with sources (maybe translation pipeline is currently running)
+      cmake --build . --target pot
+      cmake --build . --target translations
+      # Build Xournal++
+      cmake --build .
+      cmake --build . --target install
+    workingDirectory: ./build
+    displayName: 'Build Xournal++'

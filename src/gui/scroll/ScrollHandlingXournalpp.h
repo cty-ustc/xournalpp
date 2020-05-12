@@ -13,25 +13,23 @@
 
 #include "ScrollHandling.h"
 
-class ScrollHandlingXournalpp : public ScrollHandling
-{
+class ScrollHandlingXournalpp: public ScrollHandling {
 public:
-	ScrollHandlingXournalpp();
-	virtual ~ScrollHandlingXournalpp();
+    ScrollHandlingXournalpp();
+    ~ScrollHandlingXournalpp() override;
 
 public:
-	virtual void setLayoutSize(int width, int height);
+    void setLayoutSize(int width, int height) override;
 
-	virtual int getPrefferedWidth();
-	virtual int getPrefferedHeight();
+    int getPreferredWidth() override;
+    int getPreferredHeight() override;
 
-	virtual void translate(cairo_t* cr, double& x1, double& x2, double& y1, double& y2);
-	virtual void translate(double& x, double& y);
+    void translate(cairo_t* cr, double& x1, double& x2, double& y1, double& y2) override;
+    void translate(double& x, double& y) override;
 
-	virtual bool fullRepaint();
+    bool fullRepaint() override;
 
-	virtual void scrollChanged();
+    void scrollChanged() override;
 
 private:
-	XOJ_TYPE_ATTRIB;
 };

@@ -11,22 +11,21 @@
 
 #pragma once
 
-#include <XournalType.h>
+#include <string>
+#include <vector>
+
 #include "PenInputHandler.h"
+#include "XournalType.h"
 
-class MouseInputHandler : public PenInputHandler
-{
+class MouseInputHandler: public PenInputHandler {
 private:
-	XOJ_TYPE_ATTRIB;
+    void setPressedState(InputEvent const& event);
 
-	void setPressedState(InputEvent*);
 public:
-	explicit MouseInputHandler(InputContext* inputContext);
-	~MouseInputHandler() override;
+    explicit MouseInputHandler(InputContext* inputContext);
+    ~MouseInputHandler() override;
 
-	bool handleImpl(InputEvent* event) override;
-	bool changeTool(InputEvent* event) override;
-	void onBlock() override;
+    bool handleImpl(InputEvent const& event) override;
+    bool changeTool(InputEvent const& event) override;
+    void onBlock() override;
 };
-
-

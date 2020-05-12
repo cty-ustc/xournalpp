@@ -1,58 +1,32 @@
 #include "Tool.h"
 
-Tool::Tool(string name, ToolType type, int color, int capabilities, double* thickness)
-{
-	XOJ_INIT_TYPE(Tool);
+#include <utility>
 
-	this->name = name;
-	this->type = type;
-	this->thickness = thickness;
+Tool::Tool(string name, ToolType type, int color, int capabilities, double* thickness) {
+    this->name = std::move(name);
+    this->type = type;
+    this->thickness = thickness;
 
-	this->capabilities = capabilities;
+    this->capabilities = capabilities;
 
-	setColor(color);
+    setColor(color);
 }
 
-Tool::~Tool()
-{
-	XOJ_CHECK_TYPE(Tool);
-
-	delete[] this->thickness;
-	this->thickness = NULL;
-
-	XOJ_RELEASE_TYPE(Tool);
+Tool::~Tool() {
+    delete[] this->thickness;
+    this->thickness = nullptr;
 }
 
-string Tool::getName()
-{
-	XOJ_CHECK_TYPE(Tool);
+auto Tool::getName() -> string { return this->name; }
 
-	return this->name;
+void Tool::setCapability(int capability, bool enabled) {
+    if (enabled) {
+        this->capabilities |= capability;
+    } else {
+        this->capabilities &= ~capability;
+    }
 }
 
-void Tool::setCapability(int capability, bool enabled)
-{
-	XOJ_CHECK_TYPE(Tool);
+auto Tool::hasCapability(ToolCapabilities cap) const -> bool { return (this->capabilities & cap) != 0; }
 
-	if (enabled)
-	{
-		this->capabilities |= capability;
-	}
-	else
-	{
-		this->capabilities &= ~capability;
-	}
-}
-
-bool Tool::hasCapability(ToolCapabilities cap)
-{
-	XOJ_CHECK_TYPE(Tool);
-
-	return (this->capabilities & cap) != 0;
-}
-
-double Tool::getThickness(ToolSize size)
-{
-	return this->thickness[size - TOOL_SIZE_VERY_FINE];
-}
-
+auto Tool::getThickness(ToolSize size) -> double { return this->thickness[size - TOOL_SIZE_VERY_FINE]; }

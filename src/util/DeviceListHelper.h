@@ -11,31 +11,36 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
-#include <vector>
-#include <string>
+#include "control/settings/Settings.h"
 
 using std::string;
 using std::vector;
 
-class InputDevice
-{
+class InputDevice {
 public:
-	explicit InputDevice(GdkDevice* device);
-	~InputDevice() = default;
+    explicit InputDevice(GdkDevice* device);
+    explicit InputDevice(string name, GdkInputSource source);
+    ~InputDevice() = default;
 
 public:
-	GdkDevice* getDevice() const;
-	string getType() const;
-	string getName() const;
+    string getType() const;
+    string getName() const;
+    GdkInputSource getSource() const;
+    void updateType(GdkInputSource newSource);
+
+    bool operator==(const InputDevice& inputDevice) const;
 
 private:
-	GdkDevice* device;
+    string name;
+    GdkInputSource source;
 };
 
-namespace DeviceListHelper
-{
-vector<InputDevice> getDeviceList(bool ignoreTouchDevices = false);
+namespace DeviceListHelper {
+vector<InputDevice> getDeviceList(Settings* settings, bool ignoreTouchDevices = false);
 }

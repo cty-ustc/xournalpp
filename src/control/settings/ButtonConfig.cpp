@@ -2,78 +2,48 @@
 
 #include "control/ToolHandler.h"
 
-ButtonConfig::ButtonConfig(ToolType action, int color, ToolSize size, DrawingType drawingType, EraserType eraserMode)
-{
-	XOJ_INIT_TYPE(ButtonConfig);
-
-	this->action = action;
-	this->color = color;
-	this->size = size;
-	this->drawingType = drawingType;
-	this->eraserMode = eraserMode;
-	this->disableDrawing = false;
+ButtonConfig::ButtonConfig(ToolType action, int color, ToolSize size, DrawingType drawingType, EraserType eraserMode) {
+    this->action = action;
+    this->color = color;
+    this->size = size;
+    this->drawingType = drawingType;
+    this->eraserMode = eraserMode;
+    this->disableDrawing = false;
 }
 
-ButtonConfig::~ButtonConfig()
-{
-	XOJ_RELEASE_TYPE(ButtonConfig);
-}
+ButtonConfig::~ButtonConfig() = default;
 
-bool ButtonConfig::getDisableDrawing()
-{
-	XOJ_CHECK_TYPE(ButtonConfig);
+auto ButtonConfig::getDisableDrawing() const -> bool { return this->disableDrawing; }
 
-	return this->disableDrawing;
-}
+auto ButtonConfig::getDrawingType() -> DrawingType { return this->drawingType; }
 
-DrawingType ButtonConfig::getDrawingType()
-{
-	XOJ_CHECK_TYPE(ButtonConfig);
+auto ButtonConfig::getAction() -> ToolType { return this->action; }
 
-	return this->drawingType;
-}
+void ButtonConfig::acceptActions(ToolHandler* toolHandler) {
+    if (this->action == TOOL_NONE) {
+        return;
+    }
 
-ToolType ButtonConfig::getAction()
-{
-	XOJ_CHECK_TYPE(ButtonConfig);
+    toolHandler->selectTool(this->action, false);
 
-	return this->action;
-}
+    if (this->action == TOOL_PEN || this->action == TOOL_HILIGHTER || this->action == TOOL_ERASER) {
 
-void ButtonConfig::acceptActions(ToolHandler* toolHandler)
-{
-	XOJ_CHECK_TYPE(ButtonConfig);
+        if (this->drawingType != DRAWING_TYPE_DONT_CHANGE) {
+            toolHandler->setDrawingType(this->drawingType);
+        }
 
-	if (this->action == TOOL_NONE)
-	{
-		return;
-	}
+        if (this->size != TOOL_SIZE_NONE) {
+            toolHandler->setSize(this->size);
+        }
+    }
 
-	toolHandler->selectTool(this->action, false);
+    if (this->action == TOOL_PEN || this->action == TOOL_HILIGHTER || this->action == TOOL_TEXT) {
+        toolHandler->setColor(this->color, false);
+    }
 
-	if (this->action == TOOL_PEN || this->action == TOOL_HILIGHTER || this->action == TOOL_ERASER)
-	{
+    if (this->action == TOOL_ERASER && this->eraserMode != ERASER_TYPE_NONE) {
+        toolHandler->setEraserType(this->eraserMode);
+    }
 
-		if (this->drawingType != DRAWING_TYPE_DONT_CHANGE)
-		{
-			toolHandler->setDrawingType(this->drawingType);
-		}
-
-		if (this->size != TOOL_SIZE_NONE)
-		{
-			toolHandler->setSize(this->size);
-		}
-	}
-
-	if (this->action == TOOL_PEN || this->action == TOOL_HILIGHTER || this->action == TOOL_TEXT)
-	{
-		toolHandler->setColor(this->color, false);
-	}
-
-	if (this->action == TOOL_ERASER && this->eraserMode != ERASER_TYPE_NONE)
-	{
-		toolHandler->setEraserType(this->eraserMode);
-	}
-
-	toolHandler->fireToolChanged();
+    toolHandler->fireToolChanged();
 }

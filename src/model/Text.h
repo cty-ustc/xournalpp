@@ -11,58 +11,55 @@
 
 #pragma once
 
-#include "Element.h"
-#include "Font.h"
-#include "AudioElement.h"
-
 #include <gtk/gtk.h>
 
-class Text : public AudioElement
-{
+#include "AudioElement.h"
+#include "Element.h"
+#include "Font.h"
+
+class Text: public AudioElement {
 public:
-	Text();
-	virtual ~Text();
-
-public:
-	void setFont(XojFont& font);
-	XojFont& getFont();
-
-	string getText();
-	void setText(string text);
-
-	void setWidth(double width);
-	void setHeight(double height);
-
-	void setInEditing(bool inEditing);
-	bool isInEditing();
-
-	virtual void scale(double x0, double y0, double fx, double fy);
-	virtual void rotate(double x0, double y0, double xo, double yo, double th);
-
-	virtual bool rescaleOnlyAspectRatio();
-
-	/**
-	 * @overwrite
-	 */
-	virtual Element* clone();
-
-	bool intersects(double x, double y, double halfSize) override;
-	bool intersects(double x, double y, double halfSize, double* gap) override;
+    Text();
+    ~Text() override;
 
 public:
-	// Serialize interface
-	void serialize(ObjectOutputStream& out);
-	void readSerialized(ObjectInputStream& in);
+    void setFont(XojFont& font);
+    XojFont& getFont();
+
+    string getText();
+    void setText(string text);
+
+    void setWidth(double width);
+    void setHeight(double height);
+
+    void setInEditing(bool inEditing);
+    bool isInEditing() const;
+
+    void scale(double x0, double y0, double fx, double fy) override;
+    void rotate(double x0, double y0, double xo, double yo, double th) override;
+
+    bool rescaleOnlyAspectRatio() override;
+
+    /**
+     * @overwrite
+     */
+    Element* clone() override;
+
+    bool intersects(double x, double y, double halfEraserSize) override;
+    bool intersects(double x, double y, double halfEraserSize, double* gap) override;
+
+public:
+    // Serialize interface
+    void serialize(ObjectOutputStream& out) override;
+    void readSerialized(ObjectInputStream& in) override;
 
 protected:
-	virtual void calcSize();
+    void calcSize() override;
 
 private:
-	XOJ_TYPE_ATTRIB;
+    XojFont font;
 
-	XojFont font;
+    string text;
 
-	string text;
-
-	bool inEditing = false;
+    bool inEditing = false;
 };

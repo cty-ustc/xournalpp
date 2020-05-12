@@ -11,43 +11,50 @@
 
 #pragma once
 
-#include "XojPdfExport.h"
-
 #include "control/jobs/ProgressListener.h"
 #include "model/Document.h"
 
-class XojCairoPdfExport : public XojPdfExport
-{
+#include "XojPdfExport.h"
+
+class XojCairoPdfExport: public XojPdfExport {
 public:
-	XojCairoPdfExport(Document* doc, ProgressListener* progressListener);
-	virtual ~XojCairoPdfExport();
+    XojCairoPdfExport(Document* doc, ProgressListener* progressListener);
+    virtual ~XojCairoPdfExport();
 
 public:
-	virtual bool createPdf(Path file);
-	virtual bool createPdf(Path file, PageRangeVector& range);
-	virtual string getLastError();
+    virtual bool createPdf(Path file);
+    virtual bool createPdf(Path file, PageRangeVector& range);
+    virtual string getLastError();
 
-	/**
-	 * Export without background
-	 */
-	virtual void setNoBackgroundExport(bool noBackgroundExport);
+    /**
+     * Export without background
+     */
+    virtual void setNoBackgroundExport(bool noBackgroundExport);
 
 private:
-	bool startPdf(Path file);
-	void endPdf();
-	void exportPage(size_t page);
+    bool startPdf(const Path& file);
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 16, 0)
+    /**
+     * Populate the outline of the generated PDF using the outline of the
+     * background PDF.
+     *
+     * This requires features available only in cairo 1.16 or newer.
+     *
+     * @param tocModel The Document's content model. Does nothing if set to null.
+     */
+    void populatePdfOutline(GtkTreeModel* tocModel);
+#endif
+    void endPdf();
+    void exportPage(size_t page);
 
 private:
-	XOJ_TYPE_ATTRIB;
+    Document* doc = nullptr;
+    ProgressListener* progressListener = nullptr;
 
-	Document* doc = NULL;
-	ProgressListener* progressListener = NULL;
+    cairo_surface_t* surface = nullptr;
+    cairo_t* cr = nullptr;
 
-	cairo_surface_t* surface = NULL;
-	cairo_t* cr = NULL;
+    bool noBackgroundExport = false;
 
-	bool noBackgroundExport = false;
-
-	string lastError;
+    string lastError;
 };
-

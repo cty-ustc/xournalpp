@@ -11,34 +11,37 @@
 
 #pragma once
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "model/PageType.h"
 
-#include <XournalType.h>
+#include "XournalType.h"
 
 class PageTypeInfo {
 public:
-	PageType page;
-	string name;
+    PageType page;
+    string name;
 };
 
 class GladeSearchpath;
 
-class PageTypeHandler
-{
+class PageTypeHandler {
 public:
-	PageTypeHandler(GladeSearchpath* gladeSearchPath);
-	virtual ~PageTypeHandler();
+    PageTypeHandler(GladeSearchpath* gladeSearchPath);
+    virtual ~PageTypeHandler();
 
 public:
-	vector<PageTypeInfo*>& getPageTypes();
+    vector<PageTypeInfo*>& getPageTypes();
+    static PageTypeFormat getPageTypeFormatForString(const string& format);
+    static string getStringForPageTypeFormat(const PageTypeFormat& format);
 
 private:
-	void addPageTypeInfo(string name, string format, string config);
-	bool parseIni(string filename);
-	void loadFormat(GKeyFile* config, const char* group);
+    void addPageTypeInfo(string name, PageTypeFormat format, string config);
+    bool parseIni(const string& filename);
+    void loadFormat(GKeyFile* config, const char* group);
 
 private:
-	XOJ_TYPE_ATTRIB;
-
-	vector<PageTypeInfo*> types;
+    vector<PageTypeInfo*> types;
 };

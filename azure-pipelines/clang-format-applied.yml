@@ -17,14 +17,14 @@ stages:
   jobs:
   - job: 'Build_Test'
     pool:
-      vmImage: 'ubuntu-16.04'
+      vmImage: 'ubuntu-18.04'
     displayName: 'Test for correct Clang formatting'
     steps:
     - bash: |
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main"
+        sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main"
         sudo apt-get update
-        sudo apt-get install -y clang-format-8
+        sudo apt-get install -y clang-format-9
       displayName: 'Install clang-format'
     - bash: |
         # Checkout the master branch as we require it to get the list of modified files
@@ -42,7 +42,7 @@ stages:
 
         # Apply clang-format, modifying all badly formatted files
         if [ ! -z "$FILES" ]; then
-            git --no-pager diff -U0 $BASE_COMMIT -- $FILES | perl azure-pipelines/format_diff_lines.pl
+            git --no-pager diff -U0 $BASE_COMMIT -- $FILES | perl azure-pipelines/util/format_diff_lines.pl
         fi
 
       displayName: 'Run clang-format on modified files'
@@ -56,7 +56,7 @@ stages:
             # Uncommitted changes
             echo "The code was not formatted using clang-format before being submitted."
             echo "To format the code, try running the following command from the root of the repository:"
-            echo "    git --no-pager diff -U0 -- '*.cpp' '*.c' '*.h' '*.hpp' | perl azure-pipelines/format_diff_lines.pl"
+            echo "    git --no-pager diff -U0 -- '*.cpp' '*.c' '*.h' '*.hpp' | perl azure-pipelines/util/format_diff_lines.pl"
             echo
             echo "The formatting changes required are shown below."
             git --no-pager diff

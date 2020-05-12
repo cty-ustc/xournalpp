@@ -10,7 +10,7 @@ include_directories (
   ${xournalpp_INCLUDE_DIRS}
 )
 
-# Build xournal-thumbnailer as it doesn't need CXX_FLAGS from below
+# Build xournalpp-thumbnailer as it doesn't need CXX_FLAGS from below
 add_subdirectory (xoj-preview-extractor)
 
 # Used for both util and xournalpp targets
@@ -19,10 +19,10 @@ add_definitions (-g -Wreturn-type -Wuninitialized -Wunused-value -Wunused-variab
 if (WIN32)
   # optimize for size (the Windows .exe is really big)
   set (xournalpp_LDFLAGS ${xournalpp_LDFLAGS} "-Os -s")
-elseif (APPLE)
-  # Nothing to do for APPLE
+elseif (APPLE OR LINUX)
+  # Nothing to do for APPLE and linux
 else ()
-  add_definitions (-rdynamic)
+  set(xournalpp_LDFLAGS ${xournalpp_LDFLAGS} -rdynamic)
 endif ()
 
 option (DEBUG_COMPILE "Pass -Wall to CXX_FLAGS" OFF)
@@ -83,6 +83,7 @@ unset (xournalpp_SOURCES_RECURSE)
 # Used for xournalpp and xournalpp-test
 add_library (xournalpp-core OBJECT ${xournalpp_SOURCES})
 add_dependencies (xournalpp-core util)
+target_compile_features (xournalpp-core PUBLIC ${PROJECT_CXX_FEATURES})
 
 ## xournalpp main program ##
 add_executable (xournalpp

@@ -1,34 +1,16 @@
 #include "ScrollHandling.h"
 
 
-ScrollHandling::ScrollHandling(GtkAdjustment* adjHorizontal, GtkAdjustment* adjVertical)
- : adjHorizontal(adjHorizontal),
-   adjVertical(adjVertical)
-{
-	XOJ_INIT_TYPE(ScrollHandling);
-}
+ScrollHandling::ScrollHandling(GtkAdjustment* adjHorizontal, GtkAdjustment* adjVertical):
+        adjHorizontal(adjHorizontal), adjVertical(adjVertical) {}
 
-ScrollHandling::~ScrollHandling()
-{
-	XOJ_RELEASE_TYPE(ScrollHandling);
-}
+ScrollHandling::~ScrollHandling() = default;
 
-GtkAdjustment* ScrollHandling::getHorizontal()
-{
-	XOJ_CHECK_TYPE(ScrollHandling);
+auto ScrollHandling::getHorizontal() -> GtkAdjustment* { return adjHorizontal; }
 
-	return adjHorizontal;
-}
+auto ScrollHandling::getVertical() -> GtkAdjustment* { return adjVertical; }
 
-GtkAdjustment* ScrollHandling::getVertical()
-{
-	XOJ_CHECK_TYPE(ScrollHandling);
-
-	return adjVertical;
-}
-
-void ScrollHandling::init(GtkWidget* xournal, Layout* layout)
-{
-	this->xournal = xournal;
-	this->layout = layout;
+void ScrollHandling::init(GtkWidget* xournal, Layout* layout) {
+    this->xournal = xournal;
+    this->layout = layout;
 }

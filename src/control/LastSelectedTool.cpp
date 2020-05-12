@@ -2,29 +2,15 @@
 
 #include "Tool.h"
 
-LastSelectedTool::LastSelectedTool(Tool* tool)
- : tool(tool)
-{
-	XOJ_INIT_TYPE(LastSelectedTool);
+LastSelectedTool::LastSelectedTool(Tool* tool): tool(tool) { this->applyFrom(tool); }
 
-	this->applyFrom(tool);
-}
-
-LastSelectedTool::~LastSelectedTool()
-{
-	XOJ_CHECK_TYPE(LastSelectedTool);
-
-	XOJ_RELEASE_TYPE(LastSelectedTool);
-}
+LastSelectedTool::~LastSelectedTool() = default;
 
 /**
  * Restore the tool config and return it
  */
-Tool* LastSelectedTool::restoreAndGet()
-{
-	XOJ_CHECK_TYPE(LastSelectedTool);
+auto LastSelectedTool::restoreAndGet() -> Tool* {
+    tool->applyFrom(this);
 
-	tool->applyFrom(this);
-
-	return tool;
+    return tool;
 }

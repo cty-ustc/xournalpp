@@ -11,38 +11,36 @@
 
 #pragma once
 
-#include "control/settings/Settings.h"
-#include <Path.h>
-
 #include <gtk/gtk.h>
 
-class XojOpenDlg
-{
+#include "control/settings/Settings.h"
+
+#include "Path.h"
+
+class XojOpenDlg {
 public:
-	XojOpenDlg(GtkWindow* win, Settings* settings);
-	virtual ~XojOpenDlg();
+    XojOpenDlg(GtkWindow* win, Settings* settings);
+    virtual ~XojOpenDlg();
 
 public:
-	Path showOpenDialog(bool pdf, bool& attachPdf);
-	Path showOpenTemplateDialog();
+    Path showOpenDialog(bool pdf, bool& attachPdf);
+    Path showOpenTemplateDialog();
 
 protected:
-	void addFilterAllFiles();
-	void addFilterPdf();
-	void addFilterXoj();
-	void addFilterXopp();
-	void addFilterXopt();
+    void addFilterAllFiles();
+    void addFilterPdf();
+    void addFilterXoj();
+    void addFilterXopp();
+    void addFilterXopt();
 
-	Path runDialog();
-
-private:
-	static void updatePreviewCallback(GtkFileChooser* fileChooser, void* userData);
+    Path runDialog();
 
 private:
-	XOJ_TYPE_ATTRIB;
+    static void updatePreviewCallback(GtkFileChooser* fileChooser, void* userData);
 
-	GtkWidget* dialog;
+private:
+    GtkWidget* dialog;
 
-	GtkWindow* win;
-	Settings* settings;
+    GtkWindow* win;
+    Settings* settings;
 };
