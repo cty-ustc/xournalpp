@@ -11,7 +11,7 @@ set (VERSION_SUFFIX "")
 set (PROJECT_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}${VERSION_SUFFIX}")
 set (PROJECT_PACKAGE "xournalpp")
 set (PROJECT_STRING "${PROJECT_NAME} ${PROJECT_VERSION}")
-set (PROJECT_URL "https://github.com/xournalpp/xournalpp")
+set (PROJECT_URL "https://github.com/jaijeet/xournalpp")
 
 set (CMAKE_MODULE_PATH
     "${PROJECT_SOURCE_DIR}/cmake/find"

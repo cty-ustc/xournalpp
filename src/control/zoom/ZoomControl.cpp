@@ -140,7 +140,7 @@ void ZoomControl::endZoomSequence()
 	XOJ_CHECK_TYPE(ZoomControl);
 
 	scrollPositionX = -1;
-	scrollPositionY = -1;
+	scrollPositionY = -1; 
 
 	zoomSequenceStart = -1;
 }
@@ -285,7 +285,7 @@ bool ZoomControl::updateZoomFitValue(const Rectangle& widget_rect, size_t pageNo
 		return false;
 	}
 
-	double zoom_fit_width = widget_rect.width / (page->getWidth() + 20.0);
+	double zoom_fit_width = widget_rect.width / (page->getWidth() /* + 20.0 */);// jr: removing the +20 removes the annoying border on the right
 	if(zoom_fit_width < this->zoomMin || zoom_fit_width > this->zoomMax)
 	{
 		return false;
@@ -293,10 +293,12 @@ bool ZoomControl::updateZoomFitValue(const Rectangle& widget_rect, size_t pageNo
 
 	this->zoomFitValue = zoom_fit_width;
 	fireZoomRangeValueChanged();
+    /* JR - part of disabling zoomFitMode, which does not keep position
 	if(this->zoomFitMode && !this->zoomPresentationMode)
 	{
 		this->setZoomFitMode(true);
 	}
+    */ 
 	return true;
 }
 
@@ -319,8 +321,8 @@ bool ZoomControl::updateZoomPresentationValue(size_t pageNo)
 	}
 
 	Rectangle widget_rect = getVisibleRect();
-	double zoom_fit_width = widget_rect.width / (page->getWidth() + 14.0);
-	double zoom_fit_height = widget_rect.height / (page->getHeight() + 14.0);
+    double zoom_fit_width = widget_rect.width / (page->getWidth() + 14.0);// jr: why the +14? - might have something to do with the red line
+	double zoom_fit_height = widget_rect.height / (page->getHeight() + 14.0); // jr: why the +14? - might have something to do with the red line
 	double zoom_presentation = zoom_fit_width < zoom_fit_height ? zoom_fit_width : zoom_fit_height;
 	if(zoom_presentation < this->zoomMin)
 	{
@@ -345,7 +347,6 @@ double ZoomControl::getZoomPresentationValue()
 double ZoomControl::getZoom100Value()
 {
 	XOJ_CHECK_TYPE(ZoomControl);
-
 	return this->zoom100Value;
 }
 
@@ -363,17 +364,30 @@ void ZoomControl::zoom100()
 		this->setZoomFitMode(false);
 	}
 
+
+	Rectangle rect = getVisibleRect(); // JR
+	// startZoomSequence(rect.x, rect.y); // JR 
 	startZoomSequence(-1, -1);
 	this->zoomSequnceChange(this->zoom100Value, false);
+	// this->zoomSequnceChange(this->zoom100Value, true); // JR; causes segfault
 	endZoomSequence();
+    // setScrollPositionAfterZoom(rect.x, rect.y);
 }
 
 void ZoomControl::zoomFit()
 {
-	if(this->zoomFitMode && !this->zoomPresentationMode && this->zoom != this->zoomFitValue)
+	// if(this->zoomFitMode && !this->zoomPresentationMode && this->zoom != this->zoomFitValue) // JR
+	if(!this->zoomPresentationMode && this->zoom != this->zoomFitValue) // JR
 	{
-		startZoomSequence(-1, -1);
+	    if (this->zoomFitMode) {
+            this->setZoomFitMode(false);
+        }
+
+	    // Rectangle rect = getVisibleRect(); // JR
+	    // startZoomSequence(rect.x, rect.y); // JR 
+		startZoomSequence(-1, -1); // JR
 		this->zoomSequnceChange(this->zoomFitValue, false);
+		// this->zoomSequnceChange(this->zoomFitValue, true); // JR; causes segfault
 		endZoomSequence();
 	}
 }
@@ -398,10 +412,13 @@ void ZoomControl::setZoomFitMode(bool isZoomFitMode)
 		this->control->fireActionSelected(GROUP_ZOOM_FIT, isZoomFitMode ? ACTION_ZOOM_FIT : ACTION_NOT_SELECTED);
 	}
 
+    /*
 	if(isZoomFitMode)
 	{
 		zoomFit();
 	}
+    */
+    zoomFit();
 }
 
 bool ZoomControl::isZoomFitMode()

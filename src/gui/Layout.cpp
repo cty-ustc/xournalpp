@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Layout.h"
 
 #include "XournalView.h"
@@ -12,17 +13,17 @@
 /**
  * Padding outside the pages, including shadow
  */
-constexpr size_t const XOURNAL_PADDING = 10;
+constexpr size_t const XOURNAL_PADDING = /*10*/ 0; // JR
 
 /**
  * Allowance for shadow between page pairs in paired page mode
  */
-constexpr size_t const XOURNAL_ROOM_FOR_SHADOW = 3;
+constexpr size_t const XOURNAL_ROOM_FOR_SHADOW = /*3*/ 0; // JR
 
 /**
  * Padding between the pages
  */
-constexpr size_t const XOURNAL_PADDING_BETWEEN = 15;
+constexpr size_t const XOURNAL_PADDING_BETWEEN = /* 15 */ 0; // JR
 
 
 Layout::Layout(XournalView* view, ScrollHandling* scrollHandling)
